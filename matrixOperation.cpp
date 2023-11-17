@@ -8,6 +8,7 @@ class Matrix
         int arr2x2[2][2];
         int arr3x3[3][3];
         int size;
+        float determinant;
     public:
         Matrix(int size, bool fill_with_zero);
         void print_matrix();
@@ -35,6 +36,12 @@ Matrix::Matrix(int size, bool fill_with_zero = false)
             else
                 arr3x3[i][j] = number;
         }
+    if (size == 2)
+        determinant = (arr2x2[0][0] * arr2x2[1][1]) - (arr2x2[0][1] * arr2x2[1][0]);
+    else 
+        determinant = arr3x3[0][0] * ((arr3x3[1][1] * arr3x3[2][2]) - (arr3x3[2][1] * arr3x3[1][2])) -
+                        arr3x3[0][1] * ((arr3x3[1][0] * arr3x3[2][2]) - (arr3x3[2][0] * arr3x3[1][2])) +
+                        arr3x3[0][2] * ((arr3x3[1][0] * arr3x3[2][1]) - (arr3x3[2][0] * arr3x3[1][1]));
 }
 
 void Matrix::print_matrix()
