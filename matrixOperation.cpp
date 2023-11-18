@@ -10,16 +10,18 @@ class Matrix
         float arr3x3[3][3];
         int size;
         float determinant;
+        bool zero_determinant = false;
     public:
         Matrix(int size, bool fill_with_zero, bool fill_with_one, bool eye_matrice);
         void print_matrix();
         static void print_const_matrix(std::string option[], bool zero_arr, bool one_arr, bool eye_arr);
         static void operation_menu(int size);
+        bool deterninant_status();
         int random_number_generator();
         Matrix operator+(Matrix const& array);
         Matrix operator-(Matrix const& array);
         Matrix operator*(Matrix const& array);
-        //Matrix inverse_matrix(int size);
+        Matrix inverse_matrix(int size);
         static void swap(float *num1, float *num2);
 
 };
@@ -53,6 +55,8 @@ Matrix::Matrix(int size, bool fill_with_zero = false, bool fill_with_one = false
         determinant = arr3x3[0][0] * ((arr3x3[1][1] * arr3x3[2][2]) - (arr3x3[2][1] * arr3x3[1][2])) -
                         arr3x3[0][1] * ((arr3x3[1][0] * arr3x3[2][2]) - (arr3x3[2][0] * arr3x3[1][2])) +
                         arr3x3[0][2] * ((arr3x3[1][0] * arr3x3[2][1]) - (arr3x3[2][0] * arr3x3[1][1]));
+    if (determinant == 0)
+        zero_determinant = true;
 }
 
 void Matrix::print_matrix()
@@ -67,6 +71,11 @@ void Matrix::print_matrix()
                 std::cout << arr3x3[i][j] << ' ';
         std::cout << '\n';
     }
+}
+
+bool Matrix::deterninant_status()
+{
+    return zero_determinant;
 }
 
 void Matrix::print_const_matrix(std::string option[], bool zero_arr = false, bool one_arr = false, bool eye_arr = false)
@@ -192,31 +201,43 @@ Matrix Matrix::operator*(Matrix const& array)
     return resault;
 }
 
-/*Matrix Matrix::inverse_matrix(int size)
+Matrix Matrix::inverse_matrix(int size)
 {
+    float invDet = 1.0 / determinant; 
     if (size == 2)
     {
         Matrix temp(2, true);
         swap(&arr2x2[0][0], &arr2x2[1][1]);
         arr2x2[1][0] *= -1;
         arr2x2[0][1] *= -1;
+        
         for (int i = 0; i < 2; i++)
             for (int j = 0; j < 2; j++)
-                temp.arr2x2[i][j] = arr2x2[i][j] / determinant;
+                temp.arr2x2[i][j] = arr2x2[i][j] * invDet;
         return temp;
     }
     else
     {
-
+        Matrix temp(3, true);
+        temp.arr3x3[0][0] = (arr3x3[1][1] * arr3x3[2][2] - arr3x3[2][1] * arr3x3[1][2]) * invDet;
+        temp.arr3x3[0][1] = (arr3x3[0][2] * arr3x3[2][1] - arr3x3[0][1] * arr3x3[2][2]) * invDet;
+        temp.arr3x3[0][2] = (arr3x3[0][1] * arr3x3[1][2] - arr3x3[0][2] * arr3x3[1][1]) * invDet;
+        temp.arr3x3[1][0] = (arr3x3[1][2] * arr3x3[2][0] - arr3x3[1][0] * arr3x3[2][2]) * invDet;
+        temp.arr3x3[1][1] = (arr3x3[0][0] * arr3x3[2][2] - arr3x3[0][2] * arr3x3[2][0]) * invDet;
+        temp.arr3x3[1][2] = (arr3x3[1][0] * arr3x3[0][2] - arr3x3[0][0] * arr3x3[1][2]) * invDet;
+        temp.arr3x3[2][0] = (arr3x3[1][0] * arr3x3[2][1] - arr3x3[2][0] * arr3x3[1][1]) * invDet;
+        temp.arr3x3[2][1] = (arr3x3[2][0] * arr3x3[0][1] - arr3x3[0][0] * arr3x3[2][1]) * invDet;
+        temp.arr3x3[2][2] = (arr3x3[0][0] * arr3x3[1][1] - arr3x3[1][0] * arr3x3[0][1]) * invDet;
+        return temp;
     }
-}*/
+}
 
 void Matrix::operation_menu(int size)
 {
-        Matrix array1(size);
-        Matrix array2(size);
-        Matrix resualt(size, true);
-        bool resualt_use = false;
+        Matrix matrix1(size);
+        Matrix matrix2(size);
+        Matrix result(size, true);
+        bool use_result = false;
     while (true)
     {
         int choice;
@@ -238,12 +259,12 @@ void Matrix::operation_menu(int size)
                 int choice;
                 std::cin >> choice;
                 if (choice == 1)
-                    array1.print_matrix();
+                    matrix1.print_matrix();
                 else if (choice == 2)
-                    array2.print_matrix();
+                    matrix2.print_matrix();
                 else if (choice == 3)
-                    if (resualt_use)
-                        resualt.print_matrix();
+                    if (use_result)
+                        result.print_matrix();
                     else
                         std::cout << "you dont use resault matrice, first of all make some operation.\n";
                 else if (choice == 4)
@@ -254,25 +275,74 @@ void Matrix::operation_menu(int size)
         }
         else if (choice == 2)
         {
-            resualt = array1 + array2;
-            resualt_use = true;
+            result = matrix1 + matrix2;
+            use_result = true;
         }
         else if (choice == 3)
         {
-            resualt = array1 - array2;
-            resualt_use = true;
+            result = matrix1 - matrix2;
+            use_result = true;
         }
         else if (choice == 4)
         {
-            resualt = array1 * array2;
-            resualt_use = true;
+            result = matrix1 * matrix2;
+            use_result = true;
+        }
+        else if (choice ==5)
+        {
+            Matrix invMatrix(size, true);
+            while (true)
+            {
+                std::cout << "1. inverse matrice 1.\n";
+                std::cout << "2. inverse matrice 2.\n";
+                std::cout << "3. inverse result matrice.\n";
+                std::cout << "4. exit.\n";
+                int choice;
+                std::cin >> choice;
+                if (choice == 1)
+                {
+                    if (matrix1.deterninant_status())
+                    {
+                        std::cout << "matrix 1 is not invertible.\n";
+                        continue;
+                    }
+                    invMatrix = matrix1.inverse_matrix(size);
+                    invMatrix.print_matrix();
+                }
+                else if (choice == 2)
+                {
+                    if (matrix2.deterninant_status())
+                    {
+                        std::cout << "matrix 2 is not invertible.\n";
+                        continue;
+                    }
+                    invMatrix = matrix2.inverse_matrix(size);
+                    invMatrix.print_matrix();
+                }
+                else if (choice == 3)
+                    if (use_result)
+                    {
+                        if (matrix2.deterninant_status())
+                        {
+                            std::cout << "result matrix is not invertible.\n";
+                            continue;
+                        }
+                        invMatrix = result.inverse_matrix(size);
+                        invMatrix.print_matrix();
+                    }
+                    else
+                        std::cout << "you dont use resault matrice, first of all make some operation.\n";
+                else if (choice == 4)
+                    break;
+                else
+                    break;
+            }
         }
         else if (choice == 6)
             break;
         else
             break;
     }
-    
 }
 
 void init_menu()
