@@ -1,26 +1,30 @@
 #include<iostream>                        
 #include <fstream>
 #include <random>
+#include <string>
 
 class Matrix
 {
     private:
-        int arr2x2[2][2];
-        int arr3x3[3][3];
+        float arr2x2[2][2];
+        float arr3x3[3][3];
         int size;
         float determinant;
     public:
-        Matrix(int size, bool fill_with_zero);
+        Matrix(int size, bool fill_with_zero, bool fill_with_one, bool eye_matrice);
         void print_matrix();
+        static void print_const_matrix(std::string option[], bool zero_arr, bool one_arr, bool eye_arr);
         static void operation_menu(int size);
         int random_number_generator();
         Matrix operator+(Matrix const& array);
         Matrix operator-(Matrix const& array);
         Matrix operator*(Matrix const& array);
+        //Matrix inverse_matrix(int size);
+        static void swap(float *num1, float *num2);
 
 };
 
-Matrix::Matrix(int size, bool fill_with_zero = false) 
+Matrix::Matrix(int size, bool fill_with_zero = false, bool fill_with_one = false, bool eye_matrice = false) 
 {
     int number;
     this->size = size;
@@ -29,6 +33,13 @@ Matrix::Matrix(int size, bool fill_with_zero = false)
         {
             if (fill_with_zero)
                 number = 0;
+            else if (fill_with_one)
+                number = 1;
+            else if (eye_matrice)
+                if (i == j)
+                    number = 1;
+                else
+                    number = 0;
             else
                 number = random_number_generator();
             if (size == 2)
@@ -58,6 +69,69 @@ void Matrix::print_matrix()
     }
 }
 
+void Matrix::print_const_matrix(std::string option[], bool zero_arr = false, bool one_arr = false, bool eye_arr = false)
+{
+    while (true)
+    {
+        int choice;
+        bool make_zero_matrice = false;
+        for (int i = 0; i < 3; i++)
+            std::cout << option[i];
+        std::cin >> choice;
+        if (zero_arr)
+        {
+            if (choice == 1)
+            {
+                Matrix zero_matrice(2, true);
+                zero_matrice.print_matrix();
+            }
+            else if (choice == 2)
+            {
+                Matrix zero_matrice(3, true);
+                zero_matrice.print_matrix();
+            }    
+            else if (choice == 3)
+                break;
+            else
+                break;
+        }
+        else if (one_arr)
+        {
+            if (choice == 1)
+            {
+                Matrix one_matrice(2, false, true);
+                one_matrice.print_matrix();
+            }
+            else if (choice == 2)
+            {
+                Matrix one_matrice(3, false, true);
+                one_matrice.print_matrix();
+            }    
+            else if (choice == 3)
+                break;
+            else
+                break;
+        }
+        else if (eye_arr)
+        {
+            if (choice == 1)
+            {
+                Matrix eye_matrice(2, false, false,true);
+                eye_matrice.print_matrix();
+            }
+            else if (choice == 2)
+            {
+                Matrix eye_matrice(3, false, false, true);
+                eye_matrice.print_matrix();
+            }    
+            else if (choice == 3)
+                break;
+            else
+                break;
+        }
+    }
+}
+
 int Matrix::random_number_generator()
 {
     // Create a random number generator engine
@@ -74,9 +148,16 @@ int Matrix::random_number_generator()
     return random_number;
 }
 
+void Matrix::swap(float *num1, float *num2)
+{
+    int temp = *num1;
+    *num1 = *num2;
+    *num2 = temp;
+}
+
 Matrix Matrix::operator+(Matrix const& array)
 {
-    Matrix resault(size);
+    Matrix resault(size, true);
     for (int i = 0; i < size; i++)
         for (int j = 0; j < size; j++)
             if (size == 2)
@@ -88,7 +169,7 @@ Matrix Matrix::operator+(Matrix const& array)
 
 Matrix Matrix::operator-(Matrix const& array)
 {
-    Matrix resault(size);
+    Matrix resault(size, true);
     for (int i = 0; i < size; i++)
         for (int j = 0; j < size; j++)
             if (size == 2)
@@ -100,7 +181,7 @@ Matrix Matrix::operator-(Matrix const& array)
 
 Matrix Matrix::operator*(Matrix const& array)
 {
-    Matrix resault(size);
+    Matrix resault(size, true);
     for (int i = 0; i < size; i++)
         for (int j = 0; j < size; j++)
             for (int k = 0; k < size; k++)
@@ -110,6 +191,25 @@ Matrix Matrix::operator*(Matrix const& array)
                     resault.arr3x3[i][j] = arr3x3[i][k] - array.arr3x3[k][j];
     return resault;
 }
+
+/*Matrix Matrix::inverse_matrix(int size)
+{
+    if (size == 2)
+    {
+        Matrix temp(2, true);
+        swap(&arr2x2[0][0], &arr2x2[1][1]);
+        arr2x2[1][0] *= -1;
+        arr2x2[0][1] *= -1;
+        for (int i = 0; i < 2; i++)
+            for (int j = 0; j < 2; j++)
+                temp.arr2x2[i][j] = arr2x2[i][j] / determinant;
+        return temp;
+    }
+    else
+    {
+
+    }
+}*/
 
 void Matrix::operation_menu(int size)
 {
@@ -125,8 +225,7 @@ void Matrix::operation_menu(int size)
         std::cout << "3. matrice subtraction\n";
         std::cout << "4. matrice multiplication\n";
         std::cout << "5. matrice inverse\n";
-        std::cout << "6. matrice determinant\n";
-        std::cout << "7. exit\n";
+        std::cout << "6. exit\n";
         std::cin >> choice;
         if (choice == 1)
         {
@@ -168,7 +267,9 @@ void Matrix::operation_menu(int size)
             resualt = array1 * array2;
             resualt_use = true;
         }
-        else if (choice == 7)
+        else if (choice == 6)
+            break;
+        else
             break;
     }
     
@@ -181,13 +282,31 @@ void init_menu()
         int choice;
         std::cout << "1. make 2 x 2 matrix.\n";
         std::cout << "2. make 3 x 3 matrix.\n";
-        std::cout << "3. exit.\n";
+        std::cout << "3. print matrix fill with zeros\n";
+        std::cout << "4. print matrix fill with ones\n";
+        std::cout << "5. print eye matrix\n";
+        std::cout << "6. exit.\n";
         std::cin >> choice;
         if (choice == 1)
             Matrix::operation_menu(2);
         else if (choice == 2)
             Matrix::operation_menu(3);
         else if (choice == 3)
+        {
+            std::string option[] = {"1. make 2 x 2 matrix fill with zeros.\n", "2. make 3 x 3 matrix fill with zeros.\n", "3. exit.\n"};
+            Matrix::print_const_matrix(option, true);
+        }   
+        else if (choice == 4)
+        {
+            std::string option[] = {"1. make 2 x 2 matrix fill with ones.\n", "2. make 3 x 3 matrix fill with ones.\n", "3. exit.\n"};
+            Matrix::print_const_matrix(option, false, true);
+        }
+        else if (choice == 5)
+        {
+            std::string option[] = {"1. make 2 x 2 eye matrix.\n", "2. make 3 x 3 eye matrix.\n", "3. exit.\n"};
+            Matrix::print_const_matrix(option, false, false,true);
+        }
+        else if (choice == 6)
             break;
         else
             break;
